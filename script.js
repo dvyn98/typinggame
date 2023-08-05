@@ -1,18 +1,23 @@
 // all of our quotes
 const quotes = [
-    'When you have eliminated the impossible, whatever remains, however improbable, must be the truth.',
-    'There is nothing more deceptive than an obvious fact.',
-    'I ought to know by this time that when a fact appears to be opposed to a long train of deductions it invariably proves to be capable of bearing some other interpretation.',
-    'I never make exceptions. An exception disproves the rule.',
-    'What one man can invent another can discover.',
-    'Nothing clears up a case so much as stating it to another person.',
-    'Education never ends, Watson. It is a series of lessons, with the greatest for the last.',
+  'When you have eliminated the impossible, whatever remains, however improbable, must be the truth.',
+  'There is nothing more deceptive than an obvious fact.',
+  'I ought to know by this time that when a fact appears to be opposed to a long train of deductions it invariably proves to be capable of bearing some other interpretation.',
+  'I never make exceptions. An exception disproves the rule.',
+  'What one man can invent another can discover.',
+  'Nothing clears up a case so much as stating it to another person.',
+  'Education never ends, Watson. It is a series of lessons, with the greatest for the last.',
 ];
+
 // store the list of words and the index of the word the player is currently typing
 let words = [];
 let wordIndex = 0;
-// the starting time
+
+// the starting time and other variables
 let startTime = Date.now();
+let correctCharacters = 0;
+let totalCharactersTyped = 0;
+
 // page elements
 const quoteElement = document.getElementById('quote');
 const messageElement = document.getElementById('message');
@@ -29,7 +34,7 @@ document.getElementById('start').addEventListener('click', () => {
 
   // UI updates
   // Create an array of span elements so we can set a class
-  const spanWords = words.map(function(word) { return `<span>${word} </span>`});
+  const spanWords = words.map(function (word) { return `<span>${word} </span>` });
   // Convert into string and set as innerHTML on quote display
   quoteElement.innerHTML = spanWords.join('');
   // Highlight the first word
@@ -42,10 +47,11 @@ document.getElementById('start').addEventListener('click', () => {
   typedValueElement.value = '';
   // set focus
   typedValueElement.focus();
-  // set the event handler
 
-  // Start the timer
-  startTime = new Date().getTime();
+  // Reset other variables
+  correctCharacters = 0;
+  totalCharactersTyped = 0;
+  startTime = Date.now();
 });
 
 typedValueElement.addEventListener('input', () => {
@@ -57,8 +63,17 @@ typedValueElement.addEventListener('input', () => {
   if (typedValue === currentWord && wordIndex === words.length - 1) {
     // end of sentence
     // Display success
-    const elapsedTime = new Date().getTime() - startTime;
-    const message = `CONGRATULATIONS! You finished in ${elapsedTime / 1000} seconds.`;
+    const elapsedTime = Date.now() - startTime;
+    const totalMinutes = elapsedTime / 1000 / 60; // Convert elapsed time to minutes
+    const wordsPerMinute = totalCharactersTyped / 5 / totalMinutes; // Assuming an average of 5 characters per word
+
+    
+
+    const message =
+      `CONGRATULATIONS! You finished in ${elapsedTime / 1000} seconds. ` +
+      `Your Words Per Minute (WPM) is ${wordsPerMinute.toFixed(2)}.`;
+
+
     messageElement.innerText = message;
   } else if (typedValue.endsWith(' ') && typedValue.trim() === currentWord) {
     // end of word
@@ -72,12 +87,18 @@ typedValueElement.addEventListener('input', () => {
     }
     // highlight the new word
     quoteElement.childNodes[wordIndex].className = 'highlight';
-  } else if (currentWord.startsWith(typedValue)) {
+
+    // Update word and accuracy count for correctly typed words
+    if (typedValue.trim() === currentWord) {
+      correctCharacters += currentWord.length;
+    }
+    totalCharactersTyped += currentWord.length;
+  }else if (currentWord.startsWith(typedValue)) {
     // currently correct
     // highlight the next word
-    typedValueElement.className = '';
+    typedValueElement.style.backgroundColor = ''; // Reset background color to default
   } else {
     // error state
-    typedValueElement.className = 'error';
+    typedValueElement.style.backgroundColor = 'red'; // Set background color to red
   }
 });
